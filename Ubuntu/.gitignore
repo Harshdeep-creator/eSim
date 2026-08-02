@@ -1,0 +1,11 @@
+# Local packaging / build artifacts (do not commit)
+nghdl.zip
+nghdl/
+nghdl-temp/
+verilator-4.210/
+install-eSim.sh.backup
+eSim-25.04-report/
+library/sky130_fd_pr.tar.xz
+**/__pycache__/
+**/.DS_Store
+*.log
