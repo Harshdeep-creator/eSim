@@ -59,14 +59,7 @@ run_version_script() {
     if [[ -f "$SCRIPT" ]]; then
         echo "Running script: $SCRIPT $ARGUMENT"
         bash "$SCRIPT" "$ARGUMENT"
-    echo "[eSim]" >> $config_dir/$config_file
-    echo "eSim_HOME = $eSim_Home" >> $config_dir/$config_file
-    echo "LICENSE = %(eSim_HOME)s/LICENSE" >> $config_dir/$config_file
-    echo "KicadLib = %(eSim_HOME)s/library/kicadLibrary.tar.xz" >> $config_dir/$config_file
-    echo "IMAGES = %(eSim_HOME)s/images" >> $config_dir/$config_file
-    echo "VERSION = %(eSim_HOME)s/VERSION" >> $config_dir/$config_file
-    echo "MODELICA_MAP_JSON = %(eSim_HOME)s/library/ngspicetoModelica/Mapping.json" >> $config_dir/$config_file
-   
+    fi
 }
 
 
@@ -75,6 +68,18 @@ function installNghdl
 
     echo "Installing NGHDL..........................."
     unzip -o nghdl.zip
+
+    # Overlay repository-tracked Ubuntu 25.04 compatibility scripts.
+    # nghdl.zip is packaging input and may not include these fixes;
+    # tracked scripts under nghdl-scripts/ are the reviewable source of truth.
+    if [[ -f nghdl-scripts/install-nghdl.sh ]]; then
+        cp -f nghdl-scripts/install-nghdl.sh nghdl/install-nghdl.sh
+    fi
+    if [[ -f nghdl-scripts/install-nghdl-24.04.sh ]]; then
+        mkdir -p nghdl/install-nghdl-scripts
+        cp -f nghdl-scripts/install-nghdl-24.04.sh nghdl/install-nghdl-scripts/install-nghdl-24.04.sh
+    fi
+
     cd nghdl/
     chmod +x install-nghdl.sh
 
