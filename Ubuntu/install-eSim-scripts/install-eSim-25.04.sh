@@ -64,6 +64,18 @@ function installNghdl
 
     echo "Installing NGHDL..........................."
     unzip -o nghdl.zip
+
+    # Overlay repository-tracked Ubuntu 25.04 compatibility scripts.
+    # nghdl.zip is packaging input and may not include these fixes;
+    # tracked scripts under nghdl-scripts/ are the reviewable source of truth.
+    if [[ -f nghdl-scripts/install-nghdl.sh ]]; then
+        cp -f nghdl-scripts/install-nghdl.sh nghdl/install-nghdl.sh
+    fi
+    if [[ -f nghdl-scripts/install-nghdl-24.04.sh ]]; then
+        mkdir -p nghdl/install-nghdl-scripts
+        cp -f nghdl-scripts/install-nghdl-24.04.sh nghdl/install-nghdl-scripts/install-nghdl-24.04.sh
+    fi
+
     cd nghdl/
     chmod +x install-nghdl.sh
 
@@ -133,7 +145,7 @@ function installKicad
                 fi
             else
                 echo "KiCad 8.0 is already installed."
-                exit 0
+                return 0
             fi
         fi
 
@@ -184,6 +196,9 @@ function installDependency
     
     echo "Installing Xterm..........................."
     sudo apt-get install -y xterm
+    
+    echo "Installing Unzip..........................."
+    sudo apt-get install -y unzip
     
     echo "Installing Psutil.........................."
     sudo apt-get install -y python3-psutil
