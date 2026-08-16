@@ -174,8 +174,10 @@ function installNGHDL
 
     # Extracting NGHDL to Home Directory
     cd $src_dir
+    # Clear leftover destination / partial extract so reinstall does not fail
+    # with "Directory not empty" when moving into an existing tree.
+    rm -rf "$HOME/$nghdl" "$HOME/$nghdl-source"
     tar -xJf $nghdl-source.tar.xz -C $HOME
-    rm -rf "$HOME/$nghdl"
     mv "$HOME/$nghdl-source" "$HOME/$nghdl"
 
     echo "NGHDL extracted sucessfully to $HOME"

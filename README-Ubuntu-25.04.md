@@ -2,7 +2,9 @@
 
 Branch: `ubuntu-25.04-esim-fixes`  
 Fork: based on FOSSEE/eSim `installers` branch  
-Environment: Ubuntu 25.04 (WSL2)
+Environment: Ubuntu 25.04 (WSL2; VirtualBox is optional in the task)
+
+Technologies used: Bash (installer fixes), Python (`Ubuntu/validate_esim_25.04.py`), eSim, Git, Ubuntu 25.04.
 
 ## Objective
 
@@ -25,7 +27,7 @@ Identify dependency and installer compatibility issues while installing eSim 2.5
 8. Existing NGHDL source directory could block reinstallation
 9. GHDL was rebuilt even when already installed
 10. Missing Verilator source archive in NGHDL packaging resources
-11. Missing `~/Desktop` on WSL during desktop integration (environment)
+11. Missing `~/Desktop` during desktop integration (common on WSL / minimal installs)
 12. Missing `images/logo.png`
 13. Missing `Ubuntu/src` application sources required by the launcher
 
@@ -34,12 +36,12 @@ Identify dependency and installer compatibility issues while installing eSim 2.5
 | Area | Fix |
 |---|---|
 | `install-eSim.sh` | Close missing `fi` in `run_version_script` (syntax/control-flow) |
-| `install-eSim-25.04.sh` | Replace `exit 0` with `return 0` in `installKicad()`; install `unzip`; overlay tracked NGHDL scripts after `nghdl.zip` extract |
+| `install-eSim-25.04.sh` | Replace `exit 0` with `return 0` in `installKicad()`; install `unzip`; overlay tracked NGHDL scripts after `nghdl.zip` extract; create `~/Desktop` with `mkdir -p` before copying the launcher |
 | `nghdl-scripts/install-nghdl.sh` | Map Ubuntu 25.04 to `install-nghdl-24.04.sh` |
-| `nghdl-scripts/install-nghdl-24.04.sh` | Use `libcanberra-gtk3-module`; auto-patch GHDL configure for LLVM 20.1; install `unzip`; skip GHDL rebuild when GHDL is already usable; safer reinstall `rm -rf` before move |
+| `nghdl-scripts/install-nghdl-24.04.sh` | Use `libcanberra-gtk3-module`; auto-patch GHDL configure for LLVM 20.1; install `unzip`; skip GHDL rebuild when GHDL is already usable; clear leftover NGHDL dirs before extract/move so reinstall does not fail |
 | Packaging | Add `library/kicadLibrary.tar.xz`, `images/logo.png`, and `Ubuntu/src` (GUI sources) |
 
-Environment-only workarounds (documented in the full report, not installer commits): creating `~/Desktop` on WSL; one-time cleanup of leftover NGHDL directories when needed.
+Previously manual workarounds for missing `~/Desktop` and leftover NGHDL directories are now handled in the installer scripts above.
 
 ## Files modified / added
 
@@ -51,6 +53,7 @@ Environment-only workarounds (documented in the full report, not installer commi
 - `Ubuntu/library/kicadLibrary.tar.xz`
 - `Ubuntu/src/` (application sources required by `/usr/bin/esim`)
 - `Ubuntu/.gitignore`
+- `Ubuntu/validate_esim_25.04.py`
 - `README-Ubuntu-25.04.md`
 
 ## Why `nghdl-scripts/` instead of committing `nghdl.zip`
@@ -74,6 +77,14 @@ After applying the fixes:
 - `esim` launches the eSim 2.5 GUI
 - Repeated installs skip GHDL rebuild when GHDL is already installed
 
+Python is used for a post-install check of packaging files, GUI sources, the
+`esim` launcher, and simulation tools:
+
+```bash
+cd Ubuntu
+python3 validate_esim_25.04.py
+```
+
 ## How to reproduce
 
 ```bash
@@ -90,6 +101,7 @@ cd Ubuntu
 
 chmod +x install-eSim.sh
 ./install-eSim.sh --install
+python3 validate_esim_25.04.py
 esim
 ```
 
